@@ -1,0 +1,55 @@
+version: '3.7'
+
+services:
+  db:
+    image: mariadb:10.3
+    container_name: ${P_DOMAIN}-db
+    hostname: ${P_DOMAIN}-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: ${P_USER}
+      MYSQL_PASSWORD: ${P_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${P_PASSWORD}
+    volumes:
+      - /var/docker/container/${P_DOMAIN}/mysql:/var/lib/mysql
+
+  nginx:
+    image: primehost/nginx:18.04
+    container_name: ${P_DOMAIN}-nginx
+    hostname: ${P_DOMAIN}-nginx
+    restart: always
+    volumes:
+      - /var/docker/container/${P_DOMAIN}/html:/var/www/html
+    environment:
+      PRIMEHOST_USER: ${P_USER}
+      PRIMEHOST_PASSWORD: ${P_PASSWORD}
+      PRIMEHOST_DOMAIN: ${P_DOMAIN}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${P_ROUTER}.tls.certresolver=le
+      - traefik.http.routers.${P_ROUTER}.entrypoints=websecure
+      - traefik.http.services.${P_ROUTER}.loadbalancer.server.port=80
+      - traefik.http.routers.${P_ROUTER}.rule=Host(`${P_DOMAIN}`) || Host(`${P_EXTRA_DOMAIN}`)
+
+  joomla:
+    image: joomla:php7.3-fpm
+    container_name: ${P_DOMAIN}-joomla
+    hostname: ${P_DOMAIN}-joomla
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - /var/docker/container/${P_DOMAIN}/html:/var/www/html
+    environment:
+      JOOMLA_DB_HOST: ${P_DOMAIN}-db
+      JOOMLA_DB_PASSWORD: ${P_PASSWORD}
+      PRIMEHOST_USER: ${P_USER}
+      PRIMEHOST_PASSWORD: ${P_PASSWORD}
+      PRIMEHOST_DOMAIN: ${P_DOMAIN}
+      LETSENCRYPT_EMAIL: ${P_MAIL}
+
+networks:
+  default:
+    external:
+      name: web
