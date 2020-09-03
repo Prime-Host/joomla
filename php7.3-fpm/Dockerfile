@@ -3,7 +3,7 @@ MAINTAINER Prime-Host <info@nordloh-webdesign.de>
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-# install nginx 
+# install basics
 RUN mkdir /var/run/sshd \
  && apt-get update \
  && apt-get install -y cron python-setuptools wget curl git nano vim sudo unzip \ 
@@ -17,15 +17,16 @@ RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -
  && echo "DISABLE_UPDATE_PROMPT=true" >> /root/.zshrc \
  && echo "set encoding=utf-8" >> /root/.vimrc \
  && echo "set fileencoding=utf-8" >> /root/.vimrc \
+ && echo "cd /var/www/html" >> /root/.zshrc \
  && cp -r /root/.oh-my-zsh /etc/skel/. \
  && cp /root/.zshrc /etc/skel/. \
  && cp /root/.vimrc /etc/skel/. \
  && mkdir /root/container-scripts /root/container-scripts/prime-host /root/container-scripts/custom \
- && apt-get --purge autoremove -y \
- && echo "cd /var/www/html" >> /root/.zshrc
+ && apt-get --purge autoremove -y 
 
-# nginx site conf, Supervisor Config, Create www folder and index.php, Startup Script
 ADD ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD ./start.sh /bin/prime-host/start.sh
+
+WORKDIR /var/www/html
 
 CMD ["/bin/bash", "/bin/prime-host/start.sh"]
