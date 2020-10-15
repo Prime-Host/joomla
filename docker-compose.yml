@@ -7,7 +7,7 @@ services:
     hostname: ${P_DOMAIN}-db
     restart: always
     environment:
-      MYSQL_DATABASE: wordpress
+      MYSQL_DATABASE: joomla
       MYSQL_USER: ${P_USER}
       MYSQL_PASSWORD: ${P_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${P_PASSWORD}
@@ -30,6 +30,8 @@ services:
       - traefik.http.routers.${P_ROUTER}.tls.certresolver=le
       - traefik.http.routers.${P_ROUTER}.entrypoints=websecure
       - traefik.http.services.${P_ROUTER}.loadbalancer.server.port=80
+      #- traefik.http.routers.${P_ROUTER}.middlewares=auth-${P_ROUTER}
+      # - traefik.http.middlewares.auth-${P_ROUTER}.basicauth.users=${P_USER}:${P_CRYPT}
       - traefik.http.routers.${P_ROUTER}.rule=Host(`${P_DOMAIN}`${P_EXTRA_DOMAIN})
 
   joomla:

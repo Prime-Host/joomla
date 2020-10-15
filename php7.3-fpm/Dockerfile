@@ -24,6 +24,7 @@ RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -
  && mkdir /root/container-scripts /root/container-scripts/prime-host /root/container-scripts/custom \
  && apt-get --purge autoremove -y 
 
+ADD ./joomla.ini /usr/local/etc/php/conf.d/joomla.ini
 ADD ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD ./start.sh /bin/prime-host/start.sh
 
