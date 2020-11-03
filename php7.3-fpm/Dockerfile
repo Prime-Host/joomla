@@ -4,7 +4,7 @@ MAINTAINER Prime-Host <info@nordloh-webdesign.de>
 ARG DEBIAN_FRONTEND=noninteractive
 
 # install basics
-RUN mkdir /var/run/sshd \
+RUN mkdir /var/run/sshd /var/log/php-fpm \
  && apt-get update \
  && apt-get install -y cron python-setuptools wget curl git nano vim sudo unzip \ 
     openssh-server openssl zsh supervisor mariadb-client
@@ -22,6 +22,12 @@ RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -
  && cp /root/.zshrc /etc/skel/. \
  && cp /root/.vimrc /etc/skel/. \
  && mkdir /root/container-scripts /root/container-scripts/prime-host /root/container-scripts/custom \
+ && sed -i "s|access.log = /proc/self/fd/2|access.log = /proc/self/fd/1|g" /usr/local/etc/php-fpm.d/docker.conf \
+ && sed -i 's/pm.max_children = 5/pm.max_children = 100/g' /usr/local/etc/php-fpm.d/www.conf \
+ && sed -i 's/pm.start_servers = 2/pm.start_servers = 10/g' /usr/local/etc/php-fpm.d/www.conf \
+ && sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 5/g' /usr/local/etc/php-fpm.d/www.conf \
+ && sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 20/g' /usr/local/etc/php-fpm.d/www.conf \ 
+ && sed -i 's/;pm.max_requests = 500/pm.max_requests = 500/g' /usr/local/etc/php-fpm.d/www.conf \
  && apt-get --purge autoremove -y 
 
 ADD ./joomla.ini /usr/local/etc/php/conf.d/joomla.ini
